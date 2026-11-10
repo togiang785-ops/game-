@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vượt Ải Tri Thức</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 550px;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px #33333350;
+        }
+
+        h1 {
+            color: #764ba2;
+        }
+
+        .info {
+            display: flex;
+            justify-content: space-between;
+            color: #555;
+            margin: 20px 0;
+        }
+
+        #question {
+            font-size: 21px;
+            font-weight: bold;
+            margin: 25px 0;
+        }
+
+        .answer {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .answer:hover {
+            background: #eee8ff;
+            border-color: #764ba2;
+        }
+
+        .correct {
+            background: #b9f6ca;
+        }
+
+        .wrong {
+            background: #ffcdd2;
+        }
+
+        button {
+            padding: 13px 25px;
+            border: none;
+            border-radius: 10px;
+            background: #764ba2;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background: #59358c;
+        }
+
+        #result {
+            font-size: 22px;
+            font-weight: bold;
+            color: #764ba2;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎮 VƯỢT ẢI TRI THỨC</h1>
+    <p>Chinh phục thử thách - Khám phá kiến thức!</p>
+
+    <div class="info">
+        <span id="number">Câu 1/5</span>
+        <span id="score">Điểm: 0</span>
+        <span id="time">⏰ 15s</span>
+    </div>
+
+    <h2 id="question">Bạn đã sẵn sàng chưa?</h2>
+
+    <div id="answers"></div>
+
+    <p id="feedback"></p>
+
+    <button id="next" onclick="nextQuestion()">
+        Bắt đầu chơi
+    </button>
+
+    <p id="result"></p>
+
+</div>
+
+<script>
+    const questions = [
+        {
+            q: "HTML là viết tắt của cụm từ nào?",
+            a: [
+                "HyperText Markup Language",
+                "HighText Machine Language",
+                "HyperTool Multi Language",
+                "HomeText Markup Language"
+            ],
+          correct: 0
+        },
+        {
+            q: "Thẻ nào dùng để tạo tiêu đề lớn nhất?",
+            a: ["<p>", "<h1>", "<br>", "<img>"],
+            correct: 1
+        },
+        {
+            q: "CSS được sử dụng để làm gì?",
+            a: [
+                "Tạo cơ sở dữ liệu",
+                "Trang trí giao diện trang web",
+                "Viết nội dung văn bản",
+                "Lưu trữ hình ảnh"
+            ],
+            correct: 1
+        },
+        {
+            q: "Thẻ nào dùng để tạo liên kết?",
+            a: ["<a>", "<div>", "<table>", "<title>"],
+            correct: 0
+        },
+        {
+            q: "JavaScript có chức năng gì?",
+            a: [
+                "Tạo tương tác cho trang web",
+                "Chỉ dùng để viết văn bản",
+                "Chỉ dùng để trang trí",
+                "Thay thế HTML"
+            ],
+            correct: 0
+        }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let timeLeft = 15;
+    let timer;
+    let started = false;
+    let answered = false;
+
+    function startGame() {
+        current = 0;
+        score = 0;
+        started = true;
+        document.getElementById("result").innerText = "";
+        document.getElementById("next").innerText = "Câu tiếp theo";
+        showQuestion();
+    }
+
+    function showQuestion() {
+        answered = false;
+        timeLeft = 15;
+
+        clearInterval(timer);
+
+        const q = questions[current];
+
+        document.getElementById("number").innerText =
+            `Câu ${current + 1}/${questions.length}`;
+
+        document.getElementById("score").innerText =
+            "Điểm: " + score;
+
+        document.getElementById("question").innerText = q.q;
+        document.getElementById("feedback").innerText = "";
+
+        const answers = document.getElementById("answers");
+        answers.innerHTML = "";
+
+        q.a.forEach((answer, index) => {
+            const btn = document.createElement("button");
+            btn.className = "answer";
+            btn.innerText = String.fromCharCode(65 + index) + ". " + answer;
+            btn.onclick = () => checkAnswer(index, btn);
+            answers.appendChild(btn);
+        });
+
+        timer = setInterval(() => {
+            timeLeft--;
+            document.getElementById("time").innerText =
+                "⏰ " + timeLeft + "s";
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                if (!answered) {
+                    checkAnswer(-1, null);
+                }
+            }
+        }, 1000);
+    }
+
+    function checkAnswer(index, btn) {
+        if (answered) return;
+
+        answered = true;
+        clearInterval(timer);
+
+        const correct = questions[current].correct;
+        const buttons = document.querySelectorAll(".answer");
+
+        if (index === correct) {
+            score += 10;
+            btn.classList.add("correct");
+          document.getElementById("feedback").innerText =
+                "🎉 Chính xác! Bạn thật tuyệt!";
+        } else {
+            if (btn) btn.classList.add("wrong");
+            buttons[correct].classList.add("correct");
+
+            document.getElementById("feedback").innerText =
+                "❌ Chưa chính xác! Hãy cố gắng nhé!";
+        }
+
+        document.getElementById("score").innerText =
+            "Điểm: " + score;
+    }
+
+    function nextQuestion() {
+        if (!started) {
+            startGame();
+            return;
+        }
+
+        if (!answered) {
+            document.getElementById("feedback").innerText =
+                "Hãy chọn một đáp án trước nhé!";
+            return;
+        }
+
+        current++;
+
+        if (current < questions.length) {
+            showQuestion();
+        } else {
+            endGame();
+        }
+    }
+
+    function endGame() {
+        clearInterval(timer);
+        started = false;
+
+        document.getElementById("question").innerText =
+            "🏆 HOÀN THÀNH THỬ THÁCH!";
+
+        document.getElementById("answers").innerHTML = "";
+
+        document.getElementById("number").innerText = "Kết thúc";
+        document.getElementById("time").innerText = "";
+
+        document.getElementById("result").innerText =
+            `Bạn đạt ${score}/50 điểm!`;
+
+        document.getElementById("feedback").innerText =
+            score === 50 ? "Xuất sắc! Bạn là nhà vô địch!" :
+            "Cố gắng hơn ở lần chơi tiếp theo nhé!";
+
+        document.getElementById("next").innerText =
+            "🔄 Chơi lại";
+    }
+</script>
+
+</body>
+</html>
